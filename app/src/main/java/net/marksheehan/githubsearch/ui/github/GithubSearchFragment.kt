@@ -13,6 +13,7 @@ import com.jakewharton.rxbinding3.widget.itemClicks
 import com.jakewharton.rxbinding3.widget.textChanges
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.github_search_fragment.*
 import net.marksheehan.githubsearch.datamodel.GithubRepository
 import net.marksheehan.githubsearch.R
@@ -38,6 +39,7 @@ class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
         setTextBoxInformation(0, 0)
 
         filter_button.setOnClickListener(filterButtonListener)
@@ -60,7 +62,9 @@ class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
             menu.menu.add(it)
         }
 
-        menuSubscription = menu.itemClicks().observeOn(AndroidSchedulers.mainThread()).subscribe(menuClicked)
+        menuSubscription = menu.itemClicks()
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribe(menuClicked)
 
         menu.show()
     }
@@ -72,7 +76,8 @@ class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
 
         val response = viewModel.searchRestApi(newQuery)
 
-        restApiResult = response.observeOn(AndroidSchedulers.mainThread())
+        restApiResult = response.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(onSuccess, viewModel.applicationErrorHandler)
     }
 
