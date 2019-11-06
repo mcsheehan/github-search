@@ -1,5 +1,6 @@
 package net.marksheehan.githubsearch
 
+import net.marksheehan.githubsearch.github.GithubApi
 import org.junit.Test
 
 class GithubRestApiTests{
