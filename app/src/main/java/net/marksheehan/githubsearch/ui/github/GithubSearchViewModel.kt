@@ -11,7 +11,7 @@ class GithubSearchViewModel : ViewModel() {
 
     private val githubRestApi = GithubApi.buildGithubRestApi()
 
-    private var currentLanguageSelected = ""
+    var currentLanguageSelected = ""
 
     fun getLanguageOptions(): List<String> {
         return languageList
