@@ -26,8 +26,16 @@ class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
 
     private lateinit var searchBoxTextChangeSubscriber: Disposable
     private lateinit var restApiResult: Disposable
+    private lateinit var menuSubscription: Disposable
 
     private lateinit var viewModel: GithubSearchViewModel
+
+    override fun onDestroy() {
+        super.onDestroy()
+        searchBoxTextChangeSubscriber.dispose()
+        restApiResult.dispose()
+        menuSubscription.dispose()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setTextBoxInformation(0, 0)
@@ -46,30 +54,35 @@ class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
     }
 
     val filterButtonListener : (View) -> Unit = {
-        val menu : PopupMenu = PopupMenu(this.context, it)
+        val menu = PopupMenu(this.context, it)
 
-        languageList.forEach {
+        viewModel.getLanguageOptions().forEach {
             menu.menu.add(it)
         }
 
-        val sub = menu.itemClicks().observeOn(AndroidSchedulers.mainThread())
-            .subscribe(menuClicked)
+        menuSubscription = menu.itemClicks().observeOn(AndroidSchedulers.mainThread()).subscribe(menuClicked)
 
         menu.show()
     }
 
+    fun launchNewQuery() {
+        val newQuery = appendLanguageToQuery(query_text_input.text.toString(),
+            viewModel.currentLanguageSelected
+        )
+
+        val response = viewModel.searchRestApi(newQuery)
+
+        restApiResult = response.observeOn(AndroidSchedulers.mainThread())
+            .subscribe(onSuccess, viewModel.applicationErrorHandler)
+    }
+
     val menuClicked : (MenuItem) -> Unit = {
         viewModel.currentLanguageSelected = it.title.toString()
+        launchNewQuery()
     }
 
     fun setTextBoxInformation(numberOfItems: Long, timeTakenMillis: Long) {
         query_information.setText("$numberOfItems hits in $timeTakenMillis ms")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        searchBoxTextChangeSubscriber.dispose()
-        restApiResult.dispose()
     }
 
     val onSuccess : (Response<GithubRepository>) -> Unit = {
@@ -87,14 +100,6 @@ class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
     }
 
     fun characterChanged(characterSequence: CharSequence) {
-        val newQuery = appendLanguageToQuery(
-            characterSequence.toString(),
-            viewModel.currentLanguageSelected
-        )
-
-        val response = viewModel.searchRestApi(newQuery)
-
-        restApiResult = response.observeOn(AndroidSchedulers.mainThread())
-            .subscribe(onSuccess, viewModel.applicationErrorHandler)
+        launchNewQuery()
     }
 }
