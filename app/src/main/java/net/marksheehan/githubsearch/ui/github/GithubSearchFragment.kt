@@ -1,7 +1,6 @@
 package net.marksheehan.githubsearch.ui.github
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
@@ -9,67 +8,65 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.widget.itemClicks
 import com.jakewharton.rxbinding3.widget.textChanges
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.github_search_fragment.*
-import net.marksheehan.githubsearch.datamodel.GithubRepository
 import net.marksheehan.githubsearch.R
 import net.marksheehan.githubsearch.adapters.GithubItemAdapter
-import net.marksheehan.githubsearch.datamodel.GithubItems
-import net.marksheehan.githubsearch.datamodel.languageList
+import net.marksheehan.githubsearch.datamodel.GithubRepository
 import net.marksheehan.githubsearch.github.appendLanguageToQuery
 import retrofit2.Response
 import java.util.concurrent.TimeUnit
 
 class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
 
-    private lateinit var searchBoxTextChangeSubscriber: Disposable
-    private lateinit var restApiResult: Disposable
-    private lateinit var menuSubscription: Disposable
+    private var searchBoxTextChangeSubscriber: Disposable? = null
+    private var restApiResult: Disposable? = null
+    private var menuSubscription: Disposable? = null
 
     private lateinit var viewModel: GithubSearchViewModel
 
     override fun onDestroy() {
         super.onDestroy()
-        searchBoxTextChangeSubscriber.dispose()
-        restApiResult.dispose()
-        menuSubscription.dispose()
+        searchBoxTextChangeSubscriber?.dispose()
+        restApiResult?.dispose()
+        menuSubscription?.dispose()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        viewModel = ViewModelProviders.of(this).get(GithubSearchViewModel::class.java)
 
         setTextBoxInformation(0, 0)
+        filter_button.setOnClickListener(createLanguageFilterMenu)
 
-        filter_button.setOnClickListener(filterButtonListener)
-
-        viewModel = ViewModelProviders.of(this).get(GithubSearchViewModel::class.java)
+        recycler.layoutManager = LinearLayoutManager(this.context, LinearLayoutManager.VERTICAL, false)
+        recycler.adapter = GithubItemAdapter(viewModel.displayedItems)
 
         searchBoxTextChangeSubscriber = query_text_input.textChanges()
             .subscribeOn(AndroidSchedulers.mainThread())
             .debounce(500, TimeUnit.MILLISECONDS)
             .subscribe(this::characterChanged)
-
-        recycler.layoutManager =
-            LinearLayoutManager(this.context, LinearLayoutManager.VERTICAL, false)
-        recycler.adapter = GithubItemAdapter(displayedItems)
     }
 
-    val filterButtonListener : (View) -> Unit = {
-        val menu = PopupMenu(this.context, it)
+    fun characterChanged(characterSequence: CharSequence) {
+        launchNewQuery()
+    }
 
-        viewModel.getLanguageOptions().forEach {
-            menu.menu.add(it)
+    val createLanguageFilterMenu : (View) -> Unit = {
+        val languageFilterMenu = PopupMenu(this.context, it)
+
+        viewModel.languageToSearchQueryMap.keys.forEach {
+            languageFilterMenu.menu.add(it)
         }
 
-        menuSubscription = menu.itemClicks()
+        menuSubscription = languageFilterMenu.itemClicks()
             .subscribeOn(AndroidSchedulers.mainThread())
             .subscribe(menuClicked)
 
-        menu.show()
+        languageFilterMenu.show()
     }
 
     fun launchNewQuery() {
@@ -85,15 +82,13 @@ class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
     }
 
     val menuClicked : (MenuItem) -> Unit = {
-        viewModel.currentLanguageSelected = it.title.toString()
+        viewModel.currentLanguageSelected = viewModel.languageToSearchQueryMap[it.title.toString()]!!
         launchNewQuery()
     }
 
-    fun setTextBoxInformation(numberOfItems: Long, timeTakenMillis: Long) {
+    private fun setTextBoxInformation(numberOfItems: Long, timeTakenMillis: Long) {
         query_information.setText("$numberOfItems hits in $timeTakenMillis ms")
     }
-
-    var displayedItems : MutableList<GithubItems> = mutableListOf()
 
     val onSuccess : (Response<GithubRepository>) -> Unit = {
         githubResponse ->
@@ -108,17 +103,13 @@ class GithubSearchFragment : Fragment(R.layout.github_search_fragment) {
 
         setTextBoxInformation(numberOfItems, timeTaken)
 
-        displayedItems.clear()
+        viewModel.displayedItems.clear()
         val items = githubResponse.body()?.items
 
         items?.let { it ->
-            displayedItems.addAll(it)
+            viewModel.displayedItems.addAll(it)
         }
 
         recycler.adapter!!.notifyDataSetChanged()
-    }
-
-    fun characterChanged(characterSequence: CharSequence) {
-        launchNewQuery()
     }
 }
