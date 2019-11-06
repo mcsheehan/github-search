@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Github Search</string>
+    <string name="rate_limited">Github has rate limited you. Please wait a few seconds.</string>
 </resources>
