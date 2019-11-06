@@ -1,26 +1,30 @@
-package net.marksheehan.githubsearch
+package net.marksheehan.githubsearch.github
 
-import io.reactivex.Observable
-import retrofit2.Call
+import io.reactivex.Single
+import net.marksheehan.githubsearch.datamodel.GithubRepository
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+
+fun appendLanguageToQuery(
+    repositoryQuery: String,
+    language: String
+): String {
+    val searchQuery = "${repositoryQuery}+language:${language}"
+    return searchQuery
+}
+
 interface GithubServiceInterface {
 
     @GET("search/repositories")
-    fun searchForRepositories(
+    fun searchForRepository(
         @Query("q") repositorySearchTerm: String,
         @Query("sort") sort: String = "stars"
-    ): Call<GithubRepository>
-
-    @GET("search/repositories")
-    fun searchForRepositoriesReactive(
-        @Query("q") repositorySearchTerm: String,
-        @Query("sort") sort: String = "stars"
-    ): Observable<GithubRepository>
+    ): Single<Response<GithubRepository>>
 }
 
 class GithubApi {

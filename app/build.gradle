@@ -9,7 +9,7 @@ android {
     buildToolsVersion "29.0.0"
     defaultConfig {
         applicationId "net.marksheehan.githubsearch"
-        minSdkVersion 15
+        minSdkVersion 17
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -38,10 +38,21 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.6.1'
     implementation 'com.squareup.retrofit2:converter-moshi:2.6.1'
     implementation "com.squareup.retrofit2:adapter-rxjava2:2.3.0"
-    implementation 'com.squareup.retrofit2:retrofit:2.6.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
 
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'io.reactivex.rxjava2:rxkotlin:2.1.0'
+
+    implementation "com.jakewharton.rxbinding3:rxbinding:${rootProject.rxBindingVersion}"
+    implementation "com.jakewharton.rxbinding3:rxbinding-core:$rootProject.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-appcompat:$rootProject.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-drawerlayout:$rootProject.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-leanback:$rootProject.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-recyclerview:$rootProject.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-slidingpanelayout:$rootProject.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-swiperefreshlayout:$rootProject.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-viewpager:$rootProject.rxBindingVersion"
+    implementation "com.jakewharton.rxbinding3:rxbinding-material:$rootProject.rxBindingVersion"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
