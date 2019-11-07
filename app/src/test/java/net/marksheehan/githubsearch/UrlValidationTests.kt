@@ -1,95 +1,45 @@
 package net.marksheehan.githubsearch
 
-import net.marksheehan.githubsearch.github.GithubApi
-import net.marksheehan.githubsearch.github.GithubServiceInterface
-import net.marksheehan.githubsearch.github.appendLanguageToQuery
+import net.marksheehan.githubsearch.utilities.validateURL
 import org.junit.Assert
 import org.junit.Test
 
-class GithubRestApiTests{
 
-    var api : GithubServiceInterface = GithubApi.buildGithubRestApi()
+class UrlValidationTests{
 
     @Test
-    fun ensureMoreThan1ResultReturned(){
-        val observable  = api.searchForRepository("tetris")
-
-        val response =  observable.blockingGet()
-        val result = response.body()
-
-        Assert.assertTrue(response.isSuccessful)
-        Assert.assertNotNull(result)
-        Assert.assertTrue(result!!.total_count > 0)
+    fun httpAddressIsValidURL(){
+        val url = "http://www.google.com"
+        val isValid = validateURL(url)
+        Assert.assertTrue(isValid)
     }
 
     @Test
-    fun emptyQueryProducesNotSuccessful(){
-        val query = ""
-
-        val observable  = api.searchForRepository(query)
-
-        val response =  observable.blockingGet()
-        Assert.assertFalse(response.isSuccessful)
+    fun httpsAddressIsValidURL(){
+        val url = "https://www.google.com"
+        val isValid = validateURL(url)
+        Assert.assertTrue(isValid)
     }
 
     @Test
-    fun searchingMultipleLanguagesProducesResults(){
-        val queryWithLanguage = appendLanguageToQuery("test", "kotlin")
-
-        val observable  = api.searchForRepository(queryWithLanguage)
-
-        val response =  observable.blockingGet()
-        val result = response.body()
-
-        Assert.assertTrue(response.isSuccessful)
-        Assert.assertTrue(result!!.total_count > 0)
+    fun nullTextIsNotValidURL(){
+        val url = "null"
+        val isValid = validateURL(url)
+        Assert.assertFalse(isValid)
     }
 
     @Test
-    fun searchingTargetLanguageProducesResultsWithTargetLanguage(){
-
-        val targetLanguage = "Kotlin"
-        val queryWithLanguage = appendLanguageToQuery("test", targetLanguage)
-
-        val observable  = api.searchForRepository(queryWithLanguage)
-
-        val response =  observable.blockingGet()
-        val result = response.body()
-
-        Assert.assertTrue(response.isSuccessful)
-        for (item in result!!.items){
-            Assert.assertTrue(item.language != targetLanguage )
-        }
+    fun nullIsNotValidURL(){
+        val url = null
+        val isValid = validateURL(url)
+        Assert.assertFalse(isValid)
     }
 
     @Test
-    fun searchingWithEmptyLanguageStringProducesMoreResults(){
-        val queryWithNoLanguage = appendLanguageToQuery("farm", "")
-        val queryWithLanguage = appendLanguageToQuery("farm", "Kotlin")
-
-        val observableWithNoLanguage  = api.searchForRepository(queryWithNoLanguage)
-        val responseWithNoLanguage =  observableWithNoLanguage.blockingGet()
-        val resultWithNoLanguage = responseWithNoLanguage.body()
-
-        val observableWithLanguage  = api.searchForRepository(queryWithLanguage)
-        val responseWithLanguage =  observableWithLanguage.blockingGet()
-        val resultWithLanguage = responseWithLanguage.body()
-
-        Assert.assertTrue(responseWithLanguage.isSuccessful)
-        Assert.assertTrue(responseWithNoLanguage.isSuccessful)
-        Assert.assertTrue( resultWithNoLanguage!!.total_count > resultWithLanguage!!.total_count)
+    fun emptyStringIsNotValidURL(){
+        val url = ""
+        val isValid = validateURL(url)
+        Assert.assertFalse(isValid)
     }
 
-    @Test
-    fun queryWithoutSortingByStarsIsSuccessful(){
-        val queryWithLanguage = appendLanguageToQuery("test", "kotlin")
-
-        val observable  = api.searchForRepository(queryWithLanguage, "")
-
-        val response =  observable.blockingGet()
-        val result = response.body()
-
-        Assert.assertTrue(response.isSuccessful)
-        Assert.assertTrue(result!!.total_count > 0)
-    }
 }
