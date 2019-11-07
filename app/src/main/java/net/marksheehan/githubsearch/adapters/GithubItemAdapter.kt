@@ -57,7 +57,7 @@ class GithubItemAdapter(private val mItemList: List<GithubItems>) : RecyclerView
         val githubItems = mItemList[position]
         holder.itemView.stars.setText("${githubItems.stargazers_count}")
         holder.itemView.githubItemText.setText("${githubItems.name}")
-        holder.itemView.gitHubItemDescription.setText("${githubItems.description} + ${githubItems.homepage}")
+        holder.itemView.gitHubItemDescription.setText("${githubItems.description}")
     }
 
 
