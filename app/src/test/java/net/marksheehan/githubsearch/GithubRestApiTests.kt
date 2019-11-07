@@ -46,6 +46,41 @@ class GithubRestApiTests{
     }
 
     @Test
+    fun searchingTargetLanguageProducesResultsWithTargetLanguage(){
+
+        val targetLanguage = "Kotlin"
+        val queryWithLanguage = appendLanguageToQuery("test", targetLanguage)
+
+        val observable  = api.searchForRepository(queryWithLanguage)
+
+        val response =  observable.blockingGet()
+        val result = response.body()
+
+        Assert.assertTrue(response.isSuccessful)
+        for (item in result!!.items){
+            Assert.assertTrue(item.language != targetLanguage )
+        }
+    }
+
+    @Test
+    fun searchingWithEmptyLanguageStringProducesMoreResults(){
+        val queryWithNoLanguage = appendLanguageToQuery("farm", "")
+        val queryWithLanguage = appendLanguageToQuery("farm", "Kotlin")
+
+        val observableWithNoLanguage  = api.searchForRepository(queryWithNoLanguage)
+        val responseWithNoLanguage =  observableWithNoLanguage.blockingGet()
+        val resultWithNoLanguage = responseWithNoLanguage.body()
+
+        val observableWithLanguage  = api.searchForRepository(queryWithLanguage)
+        val responseWithLanguage =  observableWithLanguage.blockingGet()
+        val resultWithLanguage = responseWithLanguage.body()
+
+        Assert.assertTrue(responseWithLanguage.isSuccessful)
+        Assert.assertTrue(responseWithNoLanguage.isSuccessful)
+        Assert.assertTrue( resultWithNoLanguage!!.total_count > resultWithLanguage!!.total_count)
+    }
+
+    @Test
     fun queryWithoutSortingByStarsIsSuccessful(){
         val queryWithLanguage = appendLanguageToQuery("test", "kotlin")
 
