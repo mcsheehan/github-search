@@ -27,7 +27,7 @@ class GithubSearchViewModel : ViewModel() {
     private val githubRestApi = GithubApi.buildGithubRestApi()
 
     val languageToSearchQueryMap = mapOf(
-        "Clear language filter" to "",
+        "Any" to "",
         "C++" to "c++",
         "python" to "python",
         "java" to "java",

@@ -10,12 +10,11 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 
-fun appendLanguageToQuery(
-    repositoryQuery: String,
-    language: String
-): String {
-    val searchQuery = "${repositoryQuery}+language:${language}"
-    return searchQuery
+fun appendLanguageToQuery(repositoryQuery: String, language: String): String {
+    return when( language == "" ) {
+        true -> repositoryQuery
+        false -> "${repositoryQuery}+language:${language}"
+    }
 }
 
 interface GithubServiceInterface {
