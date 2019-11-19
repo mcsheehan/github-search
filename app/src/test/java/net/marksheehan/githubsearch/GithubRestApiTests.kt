@@ -10,7 +10,6 @@ class GithubRestApiTests{
 
     var api : GithubServiceInterface = GithubApi.buildGithubRestApi()
 
-    @Test
     fun ensureMoreThan1ResultReturned(){
         val observable  = api.searchForRepository("tetris")
 
@@ -22,7 +21,6 @@ class GithubRestApiTests{
         Assert.assertTrue(result!!.total_count > 0)
     }
 
-    @Test
     fun emptyQueryProducesNotSuccessful(){
         val query = ""
 
@@ -32,7 +30,6 @@ class GithubRestApiTests{
         Assert.assertFalse(response.isSuccessful)
     }
 
-    @Test
     fun searchingMultipleLanguagesProducesResults(){
         val queryWithLanguage = appendLanguageToQuery("test", "kotlin")
 
@@ -45,7 +42,39 @@ class GithubRestApiTests{
         Assert.assertTrue(result!!.total_count > 0)
     }
 
-    @Test
+    fun searchingTargetLanguageProducesResultsWithTargetLanguage(){
+
+        val targetLanguage = "Kotlin"
+        val queryWithLanguage = appendLanguageToQuery("test", targetLanguage)
+
+        val observable  = api.searchForRepository(queryWithLanguage)
+
+        val response =  observable.blockingGet()
+        val result = response.body()
+
+        Assert.assertTrue(response.isSuccessful)
+        for (item in result!!.items){
+            Assert.assertTrue(item.language == targetLanguage )
+        }
+    }
+
+    fun searchingWithEmptyLanguageStringProducesMoreResults(){
+        val queryWithNoLanguage = appendLanguageToQuery("farm", "")
+        val queryWithLanguage = appendLanguageToQuery("farm", "Kotlin")
+
+        val observableWithNoLanguage  = api.searchForRepository(queryWithNoLanguage)
+        val responseWithNoLanguage =  observableWithNoLanguage.blockingGet()
+        val resultWithNoLanguage = responseWithNoLanguage.body()
+
+        val observableWithLanguage  = api.searchForRepository(queryWithLanguage)
+        val responseWithLanguage =  observableWithLanguage.blockingGet()
+        val resultWithLanguage = responseWithLanguage.body()
+
+        Assert.assertTrue(responseWithLanguage.isSuccessful)
+        Assert.assertTrue(responseWithNoLanguage.isSuccessful)
+        Assert.assertTrue( resultWithNoLanguage!!.total_count > resultWithLanguage!!.total_count)
+    }
+
     fun queryWithoutSortingByStarsIsSuccessful(){
         val queryWithLanguage = appendLanguageToQuery("test", "kotlin")
 
