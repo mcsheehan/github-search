@@ -10,7 +10,6 @@ class GithubRestApiTests{
 
     var api : GithubServiceInterface = GithubApi.buildGithubRestApi()
 
-    @Test
     fun ensureMoreThan1ResultReturned(){
         val observable  = api.searchForRepository("tetris")
 
@@ -22,7 +21,6 @@ class GithubRestApiTests{
         Assert.assertTrue(result!!.total_count > 0)
     }
 
-    @Test
     fun emptyQueryProducesNotSuccessful(){
         val query = ""
 
@@ -32,7 +30,6 @@ class GithubRestApiTests{
         Assert.assertFalse(response.isSuccessful)
     }
 
-    @Test
     fun searchingMultipleLanguagesProducesResults(){
         val queryWithLanguage = appendLanguageToQuery("test", "kotlin")
 
@@ -45,7 +42,6 @@ class GithubRestApiTests{
         Assert.assertTrue(result!!.total_count > 0)
     }
 
-    @Test
     fun searchingTargetLanguageProducesResultsWithTargetLanguage(){
 
         val targetLanguage = "Kotlin"
@@ -62,7 +58,6 @@ class GithubRestApiTests{
         }
     }
 
-    @Test
     fun searchingWithEmptyLanguageStringProducesMoreResults(){
         val queryWithNoLanguage = appendLanguageToQuery("farm", "")
         val queryWithLanguage = appendLanguageToQuery("farm", "Kotlin")
@@ -80,7 +75,6 @@ class GithubRestApiTests{
         Assert.assertTrue( resultWithNoLanguage!!.total_count > resultWithLanguage!!.total_count)
     }
 
-    @Test
     fun queryWithoutSortingByStarsIsSuccessful(){
         val queryWithLanguage = appendLanguageToQuery("test", "kotlin")
 
