@@ -58,7 +58,7 @@ class GithubRestApiTests{
 
         Assert.assertTrue(response.isSuccessful)
         for (item in result!!.items){
-            Assert.assertTrue(item.language != targetLanguage )
+            Assert.assertTrue(item.language == targetLanguage )
         }
     }
 
